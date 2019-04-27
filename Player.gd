@@ -6,13 +6,13 @@ var h_speed = 4
 signal health_changed(hp)
 signal health_depleted
 
-export(int) var hp = 0
+var hp = 0
 export(int) var max_hp = 100
 
 func _ready():
+	hp = 50
 	emit_signal("health_changed", hp)
-
-
+	
 func take_damage(amt):
 	hp -= amt
 	hp = max(0, hp)
@@ -25,7 +25,6 @@ func heal(amt):
 
 func _process(delta):
 	if Input.is_action_pressed('ui_up'):
-		take_damage(10)
 		move_by(0, -v_speed)
 	if Input.is_action_pressed('ui_down'):
 		move_by(0, v_speed)
@@ -35,6 +34,15 @@ func _process(delta):
 	if Input.is_action_pressed('ui_left'):
 		move_by(-h_speed, 0)
 		draw(-1)
+		
+	
+	if hp <= 0:
+		emit_signal("health_depleted")
+		
+	if Input.is_action_just_pressed('ui_page_up'):
+		heal(10)
+	if Input.is_action_just_pressed('ui_page_down'):
+		take_damage(10) 
 	
 func move_by(dx, dy):
 	self.position.x += dx
@@ -48,3 +56,8 @@ func draw(dir):
 		$AnimatedSprite.flip_h = true
 
 
+
+
+func _on_Control_restarted():
+	hp = 50
+	emit_signal("health_changed", hp)
